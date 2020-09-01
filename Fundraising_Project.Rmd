@@ -1,0 +1,267 @@
+---
+title: "Fundraising Project"
+author: "Chelsea Nowlin"
+date: "8/7/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+Business Objective and Goals
+### This project will be focused on analyzing the fundraising dataset for the National Veteran's Organization that wants to determine the cost effectiveness of their direct marketing campaign via direct-mail. According to recent records, the overall response from their massive database of donors is only 5.1%. Out of the 5% who respond to the direct-mail who donated, the average donation is about $13.00. It costs the organization about $0.68 in marketing costs. The goal is to develop a classification model that maiximize profits by targeting households that are most likely to donate during the fundraising campaign. 
+### 
+
+
+Loading the packages
+```{r}
+library(tidyverse)
+library(caret)
+```
+
+Data Sources and Data Used
+Loading the dataset
+```{r}
+fundraising = readRDS("C:/Users/razzb/OneDrive/Documents/UTSA Graduate School Classes/Data Algorithms/Final Project/fundraising.rds")
+summary(fundraising)
+```
+Methodology
+1. Partition the dataset
+2. Check for missing values
+3. Check summary statistics and look for outliers
+4. Determine significance of model and parameters
+5. Check Collinearity
+6. Model Selection
+7. Model prediction and validation
+8. Test data
+
+
+Data Partitioning
+```{r}
+set.seed(12345)
+trainIndex <- createDataPartition(fundraising$target, p = .8,
+                                  list = FALSE,
+                                  times = 1)
+```
+
+Training and Test data split
+```{r}
+fundraisingTrain <- fundraising[ trainIndex,]
+fundraisingTest <- fundraising[-trainIndex,]
+```
+
+Model Building
+
+1. Exploratory Data Analysis
+  Asking questions,
+  - Are they any significant paramters in the dataset that will be useful?
+  - Is there any collinearity present among the predictors?
+  
+Listing the variable names
+```{r}
+names(fundraising)
+```
+```{r}
+library(Hmisc)
+describe(fundraisingTrain)
+```
+Checking for missing values
+```{r}
+sum(is.na(fundraisingTrain))
+```
+There are no missing values present in the dataset.
+
+Creating summary statistics for the variables in the training dataset. This will give us an idea about the metrics of our targeted household population. 
+In summary, based on the skim function used, the typical house is:
+  - Middle class (based on income levels, home value, average and median family income)
+  - 1 child
+  - High wealth rating
+  - Donates infrequently
+  - Smaller donations
+  - Majority female
+```{r}
+library(skimr)
+skim(fundraisingTrain)
+```
+  
+Determining the data types for each of the variables. This will help when building the classification model.
+```{r}
+str(fundraisingTrain)
+```
+
+Detmining if the zipcode variables are worth keeping in the model.
+```{r}
+library(plyr)
+donor.count = subset(fundraising, target == "Donor")
+dcount = count(donor.count, c('zipconvert2', 'zipconvert3', 'zipconvert4', 'zipconvert5'))
+dcount
+```
+The zipcode variables will be excluded as they are not significant to the model. All the zip code zones have donors, so this will make it difficult to determine the zipcode with the most donors. Other variables may determine an easier method for determining the target population.
+
+Checking for collinearity
+```{r}
+model <- lm(target ~ homeowner + wealth + income + avg_fam_inc, data= fundraisingTrain)
+pairs(fundraisingTrain[5:12])
+pairs(fundraisingTrain[13:21])
+``` 
+Based on the collinearity matrix, the variables, avg family income, median family income, and the home value have positive collinearity. This makes sense as homeownership can be tied to income. 
+
+Dropping the zipcodes from the training set
+```{r}
+drop <- c("zipconvert2", "zipconvert3", "zipconvert4", "zipconvert5")
+df = fundraisingTrain[,!(names(fundraisingTrain) %in%drop)]
+```
+
+
+Next, looking at the pedictors tied to actual donations.
+```{r}
+par(mfrow = c(2,4))
+boxplot(df$lifetime_gifts ~ df$target, data = df)
+boxplot(df$largest_gift ~ df$target, data = df)
+boxplot(df$last_gift ~ df$target, data = df)
+boxplot(df$months_since_donate ~ fundraisingTrain$target, data = df)
+boxplot(df$time_lag ~ df$target, data = df)
+boxplot(df$avg_gift ~ df$target, data = df)
+```
+The boxplots represent the distribution among the donor related varaibles for donations. One the far right, the boxplot showing the distribution of months since the last donation, it has more predictive power based on the amount of time has passed since the last donation that could determine how likely someone is to donate again.
+
+
+Exclusions - Removing paramters determined to not be significant to the model and would not contribute to a more accurate final model.
+Paramters are removed based on p-values determination of a score equal to or less than 0.05.
+
+General Linear Model
+```{r}
+fund.glm = glm(target ~ homeowner + num_child + income + female + wealth + med_fam_inc + home_value + pct_lt15k + num_prom + lifetime_gifts + largest_gift + last_gift + months_since_donate + time_lag + avg_gift, data = df, family = binomial)
+summary(fund.glm)
+```
+The p-values help determine which variables left in the model are significant. All variables with p-values <= 0.05 will remain in the model and the non-significant variables will not be included.
+
+2. Model Classification
+
+Support Vector Machine
+Model 1: SVM
+Using training set of 2401 obs
+method = SVM Polynomial Kernel
+```{r}
+library(caret)
+library(kernlab)
+```
+
+```{r}
+Model <- train(target ~ ., data = df,
+               method = "svmPoly",
+               na.action = na.omit,
+               preProcess = c("scale", "center"),
+               trControl= trainControl(method = "none"),
+               tuneGrid = data.frame(degree=1, scale=1, C=1))
+
+```
+
+Cross Validation
+Model 2: CV Model
+Using training set of 2401 obs
+method = K fold cross validation
+10 fold, ~240 obs per fold
+```{r}
+Model2 <- train(target ~ ., data = df,
+               method = "svmPoly",
+               na.action = na.omit,
+               preProcess = c("scale", "center"),
+               trControl= trainControl(method = "cv", number = 10),
+               tuneGrid = data.frame(degree=1, scale=1, C=1))
+```
+
+Applying prediction to models
+Applied to both testing and traing datasets and both models
+```{r}
+Model.training <- predict(Model, df)
+Model.testing <- predict(Model, fundraisingTest)
+Model2 <- predict(Model2, df)
+```
+
+Applying model performance
+```{r}
+Model.training.confusion <- confusionMatrix(Model.training, df$target)
+Model.testing.confusion <- confusionMatrix(Model.testing, fundraisingTest$target)
+Model2.confusion <- confusionMatrix(Model2, df$target)
+```
+
+Creating confusion matrices for the two models to check their performance for selection.
+```{r}
+print(Model.training.confusion)
+print(Model.testing.confusion)
+print(Model2.confusion)
+```
+As we can see from the results, the cross validation models accuracy performs at 56.35%.
+The testing dataset has an accuracy performance of 53.59%.
+However, accuracy alone is not always a good indicator of a good model for selection.
+
+3. Classification under asymmetric conditions
+  - Why use weighted samples instead of a random sample?
+  Weighted sampling was used to ensure the model would have almost the same number of donors as non-donors so one class was not given more "weight" than the other that could otherwise cause potential problems like skewness in the data.
+
+
+```{r}
+futurefundraising = readRDS("C:/Users/razzb/OneDrive/Documents/UTSA Graduate School Classes/Data Algorithms/Final Project/fundraising.rds")
+summary(futurefundraising)
+```
+
+4. Evaluating the Fit of the model
+Let's try other models to see if we can get better accuracy.
+
+KNN (Nearest Neighbor Model)
+```{r}
+#library(class)
+#set.seed(12345)
+
+#futureTrain = sample(120, 120)
+#future.test.X = cbind(futurefundraising$num_child, futurefundraising$income, futurefundraising$months_since_donate)[futureTrain,]
+
+# KNN model with k = 10
+#futureDonors = knn(fund.train.X, future.test.X, train.target, k = 10)
+#futureDonors_value = as.character(futureDonors)
+#futureDonors_value
+
+
+```
+
+
+```{r}
+#library(class)
+#set.seed(12345)
+
+#futureTrain = sample(120, 120)
+#future.test.X = cbind(futurefundraising$num_child, futurefundraising$income, futurefundraising$months_since_donate)[futureTrain,]
+
+# KNN model with k = 100
+#futureDonors = knn(fund.train.X, future.test.X, train.target, k = 100)
+#futureDonors_value = as.character(futureDonors)
+#futureDonors_value
+
+```
+
+
+```{r}
+#KNN k = 10
+#write.table(futureDonors_value, file = "modelfund.csv", col.names = c("value"), row.names = FALSE)
+```
+
+```{r}
+#KNN k = 100
+#write.table(futureDonors_value, file = "fund_model.csv", col.names = c("value"), row.names = FALSE)
+```
+
+
+5. Best Model
+After checking the scoreboard from uploading the csv files for the knn model k=10, the knn model with k=10 was determined to yield the best results in terms of overall accuracy.
+The final model was a KNN model with k =10 classification model was the most accuracte. Total accuracy was 57.5%
+The model performed a little better than the Support Vector and K-Fold Cross Validation Classification Models. 
+
+
+Research Methodology - Preferred method for projects research based such as this one is to have descriptions, explanations, and reasonings written in conjunction to the statistical analysis and model training on the same document to make it easier for readers and other researchers or data scientists to follow train of thought during the enitre model training process to ensure better replicability.
+
+Model Performance - Although the KNN model was the most accuracte in this project, and many models were tested, not all models and algorithms were tested. There are many ways to train a model, and it is very likely that there is a model with even greater accuracy that was not explored yet. Further analysis would likely yield a more accurate model with further experimentation and testing on other models, including classification models. 
+For the purposes of this project, the confusion matrix was used to explain the performance of the models tested. 
+
+
+Reccomendations - Further analysis of target population would most likely yield better results for more donations. Target populations should be focused on households with higher incomes and children and have a history of frequent or recent donations. Determining the rate of frequency of the average donor would significantly help determine how often to send out direct marketing donation campaigns.
+Also looking at the possibility of other marketing media trends, such as marketing to the target audience online, social media, TV, etc. may yield better response than direct mail marketing. 

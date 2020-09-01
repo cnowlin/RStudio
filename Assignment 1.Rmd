@@ -1,0 +1,77 @@
+---
+title: "Assigment 1"
+author: "Chelsea Nowlin"
+date: "6/5/2020"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+# 8. 
+```{r}
+library("readxl")
+read_excel("C:\\Users\\razzb\\Downloads\\College.xlsx")
+```
+```{r}
+fix(College)
+```
+
+
+```{r}
+rownames(College )=College[,1]
+fix(College)
+```
+
+
+```{r}
+College=College[,-1]
+fix(College)
+```
+
+```{r}
+summary(College)
+```
+
+```{r}
+plot(College$Outstate, College$Private)
+```
+
+```{r}
+pairs(College)
+```
+
+```{r}
+attach(College)
+plot(Outstate, Private)
+```
+
+
+# 9.
+```{r}
+read_excel("C:\\Users\\razzb\\Downloads\\Auto.xlsx")
+fix(Auto)
+dim(Auto)
+Auto[1:4,]
+Auto=na.omit(Auto)
+dim(Auto)
+names(Auto)
+```
+```{r}
+range(Auto$mpg, Auto$cylinders, Auto$siaplacement, Auto$horsepower, Auto$weight, Auto$acceleration, Auto$year, Auto$origin)
+```
+```{r}
+hist(mpg)
+```
+
+# 10.
+```{r}
+library(MASS)
+Boston
+?Boston
+```
+
+```{r}
+plot(Boston)
+```
+

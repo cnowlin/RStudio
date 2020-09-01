@@ -1,0 +1,218 @@
+---
+title: "Assignmenrt 5"
+author: "Chelsea Nowlin"
+date: "7/10/2020"
+output: html_document
+---
+
+Q 2. For parts (a) through (c), indicate which of i. through iv. is correct.
+Justify your answer.
+(a) The lasso, relative to least squares, is:
+i. More flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in
+variance.
+ii. More flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease
+in bias.
+iii. Less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in
+variance.
+iv. Less flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease
+in bias.
+(b) Repeat (a) for ridge regression relative to least squares.
+(c) Repeat (a) for non-linear methods relative to least squares.
+
+Lasso to least squares - iii. Less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in
+variance.
+
+Ridge regression to lease squares - iii. Less flexible and hence will give improved prediction accuracy when its increase in bias is less than its decrease in
+variance.
+
+Non-linear to least squares - ii. More flexible and hence will give improved prediction accuracy when its increase in variance is less than its decrease
+in bias.
+
+
+Q 9. In this exercise, we will predict the number of applications received
+using the other variables in the College data set.
+(a) Split the data set into a training set and a test set.
+```{r}
+library(ISLR)
+data(College)
+set.seed(11)
+train = sample(1:dim(College)[1], dim(College)[1] / 2)
+test <- -train
+College.train <- College[train, ]
+College.test <- College[test, ]
+```
+
+(b) Fit a linear model using least squares on the training set, and
+report the test error obtained.
+```{r}
+fit.lm <- lm(Apps ~ ., data = College.train)
+pred.lm <- predict(fit.lm, College.test)
+mean((pred.lm - College.test$Apps)^2)
+```
+test error MSE - 1.026096^{6}
+
+
+(c) Fit a ridge regression model on the training set, with λ chosen
+by cross-validation. Report the test error obtained.
+```{r}
+###install.packages("glmnet")###
+```
+
+```{r}
+library(glmnet)
+train.mat <- model.matrix(Apps ~ ., data = College.train)
+test.mat <- model.matrix(Apps ~ ., data = College.test)
+grid <- 10 ^ seq(4, -2, length = 100)
+fit.ridge <- glmnet(train.mat, College.train$Apps, alpha = 0, lambda = grid, thresh = 1e-12)
+cv.ridge <- cv.glmnet(train.mat, College.train$Apps, alpha = 0, lambda = grid, thresh = 1e-12)
+bestlam.ridge <- cv.ridge$lambda.min
+bestlam.ridge
+```
+```{r}
+pred.ridge <- predict(fit.ridge, s = bestlam.ridge, newx = test.mat)
+mean((pred.ridge - College.test$Apps)^2)
+```
+The test MSE is the same as the least squares
+
+
+(d) Fit a lasso model on the training set, with λ chosen by crossvalidation. Report the test error obtained, along with the number of non-zero coefficient estimates.
+```{r}
+fit.lasso <- glmnet(train.mat, College.train$Apps, alpha = 1, lambda = grid, thresh = 1e-12)
+cv.lasso <- cv.glmnet(train.mat, College.train$Apps, alpha = 1, lambda = grid, thresh = 1e-12)
+bestlam.lasso <- cv.lasso$lambda.min
+bestlam.lasso
+```
+```{r}
+pred.lasso <- predict(fit.lasso, s = bestlam.lasso, newx = test.mat)
+mean((pred.lasso - College.test$Apps)^2)
+```
+The test MSE is the same as the least squares
+```{r}
+predict(fit.lasso, s = bestlam.lasso, type = "coefficients")
+```
+```{r}
+###install.packages("pls")###
+```
+
+(e) Fit a PCR model on the training set, with M chosen by crossvalidation. Report the test error obtained, along with the value
+of M selected by cross-validation.
+```{r}
+library(pls)
+```
+```{r}
+fit.pcr <- pcr(Apps ~ ., data = College.train, scale = TRUE, validation = "CV")
+validationplot(fit.pcr, val.type = "MSEP")
+```
+```{r}
+pred.pcr <- predict(fit.pcr, College.test, ncomp = 10)
+mean((pred.pcr - College.test$Apps)^2)
+```
+The test MSE is higher for PCR than the least squares error
+
+(f) Fit a PLS model on the training set, with M chosen by crossvalidation. Report the test error obtained, along with the value
+of M selected by cross-validation.
+```{r}
+fit.pls <- plsr(Apps ~ ., data = College.train, scale = TRUE, validation = "CV")
+validationplot(fit.pls, val.type = "MSEP")
+```
+```{r}
+pred.pls <- predict(fit.pls, College.test, ncomp = 10)
+mean((pred.pls - College.test$Apps)^2)
+```
+The test MSE is slightly lower for PLS than the least squares error.
+
+(g) Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much
+difference among the test errors resulting from these five approaches?
+```{r}
+test.avg <- mean(College.test$Apps)
+lm.r2 <- 1 - mean((pred.lm - College.test$Apps)^2) / mean((test.avg - College.test$Apps)^2)
+ridge.r2 <- 1 - mean((pred.ridge - College.test$Apps)^2) / mean((test.avg - College.test$Apps)^2)
+lasso.r2 <- 1 - mean((pred.lasso - College.test$Apps)^2) / mean((test.avg - College.test$Apps)^2)
+pcr.r2 <- 1 - mean((pred.pcr - College.test$Apps)^2) / mean((test.avg - College.test$Apps)^2)
+pls.r2 <- 1 - mean((pred.pls - College.test$Apps)^2) / mean((test.avg - College.test$Apps)^2)
+```
+R squares
+least square - 0.910422805412481
+ridge - 0.910425186297465
+lasso - 0.910428049291513
+pcr - 0.836970251054856
+pls - 0.90996958889881
+
+All models predict with high accuracy with the exception of PCR having the lowest R square score.
+
+Q. 11. We will now try to predict per capita crime rate in the Boston data
+set.
+(a) Try out some of the regression methods explored in this chapter,
+such as best subset selection, the lasso, ridge regression, and
+PCR. Present and discuss results for the approaches that you
+consider.
+```{r}
+###install.packages("leaps")###
+```
+
+```{r}
+library(MASS)
+library(leaps)
+data(Boston)
+set.seed(1)
+
+predict.regsubsets <- function(object, newdata, id, ...) {
+    form <- as.formula(object$call[[2]])
+    mat <- model.matrix(form, newdata)
+    coefi <- coef(object, id = id)
+    xvars <- names(coefi)
+    mat[, xvars] %*% coefi
+}
+
+k = 10
+folds <- sample(1:k, nrow(Boston), replace = TRUE)
+cv.errors <- matrix(NA, k, 13, dimnames = list(NULL, paste(1:13)))
+for (j in 1:k) {
+    best.fit <- regsubsets(crim ~ ., data = Boston[folds != j, ], nvmax = 13)
+    for (i in 1:13) {
+        pred <- predict(best.fit, Boston[folds == j, ], id = i)
+        cv.errors[j, i] <- mean((Boston$crim[folds == j] - pred)^2)
+    }
+}
+mean.cv.errors <- apply(cv.errors, 2, mean)
+plot(mean.cv.errors, type = "b", xlab = "Number of variables", ylab = "CV error")
+```
+```{r}
+cv.errors
+```
+```{r}
+mean.cv.errors
+```
+The cross validation selects 12 precdictor model with a CV estimate of 42.46014 for the test MSE.
+
+```{r}
+x <- model.matrix(crim ~ ., Boston)[, -1]
+y <- Boston$crim
+cv.out <- cv.glmnet(x, y, alpha = 1, type.measure = "mse")
+plot(cv.out)
+```
+
+```{r}
+cv.out <- cv.glmnet(x, y, alpha = 0, type.measure = "mse")
+plot(cv.out)
+```
+
+```{r}
+pcr.fit <- pcr(crim ~ ., data = Boston, scale = TRUE, validation = "CV")
+summary(pcr.fit)
+```
+```{r}
+validationplot(pcr.fit, val.type = "MSEP")
+```
+
+(b) Propose a model (or set of models) that seem to perform well on
+this data set, and justify your answer. Make sure that you are
+evaluating model performance using validation set error, crossvalidation, or some other reasonable alternative, as opposed to
+using training error.
+
+The model with the lowest cross validation error is the best chosen subset selection method.
+
+(c) Does your chosen model involve all of the features in the data
+set? Why or why not?
+No it does not because the model only has 13 predictors.(originally dataset has 14 predictors)
+

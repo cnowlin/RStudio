@@ -1,0 +1,113 @@
+---
+title: "Assignment 2"
+author: "Chelsea Nowlin"
+date: "6/19/2020"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r}
+# install.packages("ISLR")
+```
+
+
+```{r}
+library(ISLR)
+library(MASS)
+```
+
+```{r}
+# Multilinear Regression
+
+data(Auto)
+pairs(Auto)
+```
+
+```{r}
+names(Auto)
+
+```
+
+```{r}
+cor(Auto[1:8])
+```
+
+```{r}
+fit2 <- lm(mpg ~ . - name, data = Auto)
+summary(fit2)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(fit2)
+```
+
+```{r}
+fit3 <- lm(mpg ~ cylinders * displacement+displacement * weight, data = Auto[, 1:8])
+summary(fit3)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(log(Auto$horsepower), Auto$mpg)
+plot(sqrt(Auto$horsepower), Auto$mpg)
+plot((Auto$horsepower)^2, Auto$mpg)
+```
+
+
+```{r}
+# Qualitative Predictors
+
+fix(Carseats)
+names(Carseats)
+lm.fit=lm(Sales~.+Price:Urban+US,data=Carseats)
+summary(lm.fit)
+attach(Carseats)
+contrasts(ShelveLoc)
+```
+
+```{r}
+lm.fit=lm(Sales~.+Price:ShelveLoc,data=Carseats)
+summary(lm.fit)
+attach(Carseats)
+contrasts(ShelveLoc)
+```
+```{r}
+#install.packages("Rmisc")
+```
+```{r}
+library(Rmisc)
+myData <- Carseats
+CI(Carseats$ShevleLoc, ci=0.95)
+```
+```{r}
+confint(lm.fit)
+```
+
+```{r}
+# Non Linear Regression
+str(Boston)
+
+lm.fit=lm(medv~lstat, data=Boston)
+attach(Boston)
+lm.fit=lm(medv~lstat)
+```
+```{r}
+lm.fit2=lm(medv~lstat+I(lstat^2))
+summary(lm.fit2)
+lm.fit=lm(medv~lstat)
+anova(lm.fit,lm.fit2)
+par(mfrow=c(2,2))
+plot(lm.fit2)
+lm.fit5=lm(medv~poly(lstat,5))
+summary(lm.fit5)
+summary(lm(medv~log(rm),data=Boston))
+```
+
+```{r}
+coefficients(lm.fit2)
+coefficients(lm.fit5)
+```
+
