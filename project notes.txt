@@ -1,0 +1,70 @@
+10 year timeframe 
+2007 - 2017
+
+San Antonio
+Bexar
+
+safest car
+time of day accidents
+location of accidents
+
+
+Accident Columns
+state 
+state case
+ve total
+peds
+persons
+county
+city
+day
+month
+year
+day week
+hour
+minute
+rur_urb
+trafficway id
+latitude
+longitude
+man_coll
+
+
+
+
+change continuous data to discrete
+
+
+
+Accident
+- State
+- St Case unique identifier
+- VE total - total number of vehicles involved in accident
+- County
+- City
+- Dates, day month year hour min
+- Route
+- Persons involved in crash
+- latitude 
+- longitude
+- manner of collision
+- weather1 amd weather 2
+
+
+
+Vehicle 
+- vehicle no
+- occupants
+- make 
+- model
+- boy type
+- mharm - most harmful event
+- deaths (fatalities from accident)
+- drunk driver
+- dr height
+- dr weight
+- previous dwi
+- previous violations
+- previous other
+- weather conditions
+- rollover
