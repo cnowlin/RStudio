@@ -1,0 +1,122 @@
+---
+title: "Homework 2"
+author: Chelsea Nowlin
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(ggplot2)
+data("presidential", "economics")
+```
+
+Q1B
+```{r}
+ggplot(economics, presidential,
+       mapping = aes(x = date, y = uempmed)) +
+  geom_line(color = "white") +
+  labs(x = "Year",
+       y = "Median Duration of Unemployment (weeks)") +
+  theme(axis.line = element_line(linetype = "solid"),
+        axis.text.x = element_text(family = "Cormorant Upright"), 
+        axis.text.y = element_text(family = "Cormorant Upright"), 
+       legend.text = element_text(family = "Coromorant Upright"), 
+       legend.title = element_text(family = "Cormorant Upright"))
+```
+
+*****
+```{r}
+presidential <- subset(presidential, start > economics$date[1]) 
+
+ggplot(economics) + 
+  
+  geom_rect(
+    aes(xmin = start, xmax = end, fill = party), oggggg
+    ymin = -Inf, ymax = Inf,  
+    data = presidential) + 
+  
+  geom_vline(
+    aes(xintercept = as.numeric(start)), 
+    data = presidential,
+    color = "grey") + 
+  
+  geom_text(
+    aes(x = start, y = 2500, label = name), 
+    data = presidential, 
+    size = 3, vjust = c(3.0, 1.4, 2.0, 4.0, 2.3, 4.0, 4.0, 4.1), hjust = 0, nudge_x = 50, color = "white", angle = 90) + 
+  
+  geom_line(aes(date, unemploy), color = "white") + 
+  
+  scale_fill_manual(values = c("blue", "red")) +
+  
+  labs(x = "Year",
+       y = "Unemployment '000") +
+  
+  theme_minimal() +
+  
+  theme(axis.line = element_line(linetype = "solid")) + theme(panel.grid.major = element_line(colour = "white"), 
+    panel.grid.minor = element_line(colour = "white"), 
+    axis.title = element_text(family = "Impact", size = 12), 
+    axis.text = element_text(family = "Impact"), 
+    axis.text.x = element_text(family = "Impact", angle = 40, size = 8), 
+    axis.text.y = element_text(family = "Impact"), 
+    legend.text = element_text(size = 11, family = "Impact"), 
+    legend.title = element_text(size = 12, family = "Impact"), panel.background = element_rect(fill = "white", 
+                                                                                               colour = "white")) +labs(fill = "Party") 
+```
+*****
+Q1B
+```{r}
+presidential <- subset(presidential, start > economics$date[1])
+
+p2 <- ggplot(economics) + 
+  
+  geom_rect(aes(xmin = start, xmax = end, fill = party), 
+    ymin = -Inf, ymax = Inf, 
+    data = presidential, size = 0.5, alpha = 0.3) + 
+  
+  geom_vline(aes(xintercept = as.numeric(start)), 
+    data = presidential,
+    color = "white") + 
+   
+  geom_line(aes(date, uempmed), color = "white") +
+    
+   scale_fill_manual(values = c("blue", "red")) +
+   
+  geom_text(aes(x = median_x, y = 26, label = name), 
+    data = presidential, 
+    size = 3, vjust = 0, hjust = 0, nudge_x = 50, color = "white", angle = 90, family = "Times New Roman") + 
+  
+   labs(x = "Year",
+        y = "Median Duration of Unemployment (Weeks)",
+        fill = "Party") +
+   
+   ylim(0, 30) +
+   
+  theme(plot.subtitle = element_text(vjust = 1),
+         plot.caption = element_text(vjust = 1),
+         axis.title = element_text(size = 10),
+         legend.text = element_text(size = 8.0),
+         axis.text = element_text(size = 2),
+         legend.title = element_text(size = 10),
+         axis.line = element_line(linetype = "solid"),
+         axis.text.x = element_text(angle = 40, vjust = 1.0, hjust = 1.0, family = "Times New Roman"),
+         axis.text.y = element_text(family = "Times New Roman"),
+         panel.background = element_rect(fill = "white", color = "white")) 
+         
+   
+   
+  
+```
+
+```{r}
+
+```
+
+
+
+

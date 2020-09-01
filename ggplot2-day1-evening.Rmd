@@ -1,0 +1,107 @@
+---
+title: "ggplot2 - day1 - evening"
+author: "Ashwin Malshe"
+date: "9/10/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+ggplot()
+```
+
+
+Use already available `mpg` data set in R
+
+```{r}
+head(mpg)
+```
+
+```{r}
+summary(mpg)
+```
+
+
+```{r}
+ggplot(data = mpg,
+       mapping = aes(x = displ, y = cty)) +
+  geom_point() + 
+  geom_smooth()
+```
+
+```{r}
+ggplot(data = mpg,
+       mapping = aes(x = displ, y = cty))
+```
+
+
+## Boxplot
+
+```{r}
+ggplot(data = mpg,
+       mapping = aes(y = cty)) +
+  geom_boxplot()
+```
+
+
+```{r}
+ggplot(data = mpg,
+       mapping = aes(x = class, y = cty)) +
+  geom_boxplot()
+```
+
+```{r}
+ggplot(data = mpg,
+       mapping = aes(x = class)) +
+  geom_bar()
+
+```
+
+```{r}
+dplyr::count(mpg, class)
+```
+
+```{r}
+class_freq <- dplyr::count(mpg, class)
+```
+
+```{r}
+ggplot(data = class_freq,
+       mapping = aes(x = class)) +
+         geom_bar()
+```
+
+```{r}
+ggplot(data = class_freq,
+       mapping = aes(x = class, y = n)) +
+         geom_bar(stat = "identity")
+```
+
+
+```{r}
+print(class_freq)
+```
+
+```{r}
+ggplot(data = class_freq,
+       mapping = aes(x = class, y = n)) +
+  # geom_bar(stat = "identity") 
+  geom_col()
+```
+
+```{r}
+ggplot(data = mpg,
+       mapping = aes(x = cty)) +
+  geom_histogram(bins = 15,
+                 color = "white")
+ggplot(mpg, aes(cty))
+
+```
+
+diaminds2 <- diamonds %>% select(price, caract)
+?geom_point

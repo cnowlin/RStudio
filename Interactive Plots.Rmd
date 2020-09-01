@@ -1,0 +1,24 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(plotly)
+```
+
+```{r}
+g1 <- ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  theme_minimal() 
+
+
+ggplotly(g1)
+```
+
+
+

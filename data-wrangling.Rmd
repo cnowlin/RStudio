@@ -1,0 +1,225 @@
+---
+title: "Data Wrangling"
+author: "Chelsea Nowlin"
+date: "9/3/2019"
+output: html_document
+---
+
+
+Install package `pacman` by typing 
+
+install.packages("pacman") 
+
+in your console
+
+```{r setup, include=FALSE}
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(pacman)
+
+p_load(dplyr, haven, readxl, nycflights13)
+```
+
+
+```{r setup, include=FALSE}
+```
+
+
+`nycflights13` package has flights out of NYC in 2013
+
+
+Read the data
+
+```{r}
+data("flights")
+```
+
+```{r}
+tail(flights)
+```
+
+Take a peek at the data
+
+```{r}
+head(flights, n = 10)
+```
+
+## Select variables
+
+Create a new data frame with `month`, `day`, `origin`, `dest`, `air_time`, and `distance`
+flights2 <- select(-flights, -month, -day, -origin, -dest, -air_time, -distance)
+
+```{r}
+flights2 <- select(flights, month, day, origin, dest, air_time, distance)
+
+
+
+
+```
+
+```{r}
+head(flights2)
+
+```
+
+
+## Diversion: `magrittr` pipe
+```{r}
+flights %>% head()
+```
+
+```{r}
+"a" %>% sum(10)
+```
+
+
+Remove `flights2`
+```{r}
+rm(flights2)
+```
+
+
+```{r}
+flights2 <- flights %>% 
+  select(month, day, origin, dest, air_time, distance)
+```
+
+## Create new variable
+
+Create a new data set using `flights2` with a new variable called `org_dest` that holds `origin` - `dest` pair. So if origin is `EWR` and destination is `IAH` then `org_dest` will be `EWR_IAH`
+
+```{r}
+flights3 <- flights2 %>% 
+  mutate(org_dest = paste(origin, dest, sep = "_"), distance_km = 1.6 * distance)
+```
+
+```{r}
+head(flights3)
+```
+
+
+## Filter observations
+
+Create a new data set using `flights3` where you keep observations from January to June.
+
+```{r}
+flights4 <- flights3 %>% 
+  filter(month <= 6)
+```
+
+```{r}
+dim(flights3)
+dim(flights4)
+```
+
+## Sort observations
+
+Sort the dataset `flights4` by increasing `distance` and save it as `flights5`
+
+```{r}
+flights5 <- flights4 %>% 
+  arrange(-distance, air_time)
+```
+
+```{r}
+head(flights5)
+```
+
+## Use pipe to do all the above steps without creating intermediate data frames
+
+```{r}
+flights6 <- flights %>% 
+  select(flights(month, day, origin, dest, air_time, distance) %>% mutate(org_dest = paste(origin, dest, sep = "_"), distance_km = 1.6 * distance) %>% filter(month <= 6) %>% arrange(distance)
+```
+ 
+
+
+## Summarize
+```{r}
+summary(flights6)
+```
+
+
+Get the mean, median, and standard deviation of `air_time` and `distance` from `flights6`. Print the output rather than saving it.
+
+```{r}
+flights6 %>% 
+  summarise(air_time_mean = mean(air_time, na.rm = TRUE),
+            air_time_median = median(air_time, na.rm = TRUE),
+            air_time_sd = sd(air_time, na.rm = TRUE),
+            distance_mean = mean(distance),
+            distance_median = median(distance),
+            distance_sd = sd(distance))
+                                 
+
+
+```
+```{r}
+flights6 %>% 
+  group_by(origin) %>% 
+  summarise(air_time_mean = mean(air_time, na.rm = TRUE),
+            air_time_median = median(air_time, na.rm = TRUE),
+            air_time_sd = sd(air_time, na.rm = TRUE),
+            distance_mean = mean(distance),
+            distance_median = median(distance),
+            distance_sd = sd(distance))
+```
+
+
+
+## Group and summarize
+```{r}
+
+flights6 %>% 
+  filter(origin == "JFK") %>% 
+  summarise(air_time_mean = mean(air_time, na.rm = TRUE),
+            air_time_median = median(air_time, na.rm = TRUE),
+            air_time_sd = sd(air_time, na.rm = TRUE),
+            distance_mean = mean(distance),
+            distance_median = median(distance),
+            distance_sd = sd(distance)) %>% 
+  arrange(-distance_mean)
+```
+
+
+Get the mean, median, and standard deviation of `air_time` and `distance` from `flights6` for each month. Print the output rather than saving it.
+
+```{r}
+flights6 
+
+
+```
+
+
+## Importing external data files
+
+Import Apple data files
+
+```{r}
+
+```
+
+
+```{r}
+flights7 <- arrange(
+  filter(
+    mutate(
+      select(flights,month, day, origin, dest, air_time, distance), 
+      org_dest = paste(origin, dest, sep = "_"),
+      distance_km = 1.6 * distance),
+    month <= 6),
+  distance)
+```
+
+### merging
+common key = common variable to merge multiple data frames
+inner_join
+left_join 
+right_join
+full_join
+anti_join
+^ order of usage

@@ -1,0 +1,126 @@
+---
+title: "Homework 1"
+author: "Chelsea Nowlin"
+date: "9/10/2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+submission will only take one file. File name convention. first last name, evening cohort, .rmd
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+
+```
+
+```{r}
+data("diamonds")
+```
+
+```{r}
+diamonds2 <- diamonds
+```
+
+
+###Question1
+```{r}
+ggplot(diamonds2,
+      aes(x = carat, y = price)) + 
+  geom_point(aes(color = as.character(clarity)),
+             alpha = 0.3) +
+  labs(x = "Diamond Carats",
+       y = "Diamond Price",
+       title = "Scatterplot of Diamond prices") +
+  theme_bw()
+
+```
+
+###Question2
+```{r}
+ggplot(data = diamonds2,
+       mapping = aes(x = carat, y = price)) +
+  geom_point(aes(color = clarity),
+             alpha = 0.3) +
+  labs(x = "Diamond Carats",
+       y = "Diamond Price",
+       title = "Scatterplot of Diamond prices") +
+  facet_wrap(~clarity) +
+   theme_bw() +
+   theme(legend.position="none") 
+ 
+
+```
+
+###Question3
+```{r}
+ggplot(diamonds2, aes(table, price)) +
+  geom_smooth(aes(color = table),
+              color = "red",
+              linetype = "dashed",
+              method = "lm") +
+  labs(x = "Table",
+       y = "Price") +
+  theme_bw()
+
+```
+
+```{r}
+ggplot(diamonds2, aes(depth, price)) + 
+    geom_smooth(aes( color = price),
+                color="white", 
+                linetype="dotdash",
+                method = lm) +
+  labs(x = "Depth",
+       y = "Price") +
+  theme_bw()
+    
+```
+
+###Question4
+```{r - Graph 1}
+ggplot(diamonds2, aes(x = price)) +
+  geom_bar() +
+  theme_bw()
+```
+
+```{r - Graph 2}
+ggplot(diamonds2,
+       aes(x = price)) +
+  geom_histogram() +
+  theme_bw()
+```
+
+```{r - Graph 3}
+ggplot(diamonds2) + 
+  geom_bar(mapping = (aes(x = clarity, fill = clarity))) +
+  theme_bw() +
+  theme(legend.position="none")
+         
+```
+
+```{r - Graph 4}
+ggplot(diamonds2, aes(cut, depth)) +
+  geom_violin(color= "blue") +
+  geom_point(position ="jitter", alpha = 0.05, color = "red") + 
+  theme_bw()
+```
+
+```{r - Graph 5}
+
+
+ggplot(diamonds2, aes(x, price)) +
+  geom_smooth(method = "lm", color = "green") +
+              geom_smooth(se = FALSE) +
+  theme_bw()
+```
+
+
+
+

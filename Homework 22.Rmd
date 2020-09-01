@@ -1,0 +1,64 @@
+---
+title: "Homework 2"
+author: "Chelsea Nowlin"
+date: "9/17/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(ggplot2)
+data("presidential", "economics")
+```
+
+Q1
+```{r}
+
+```
+
+Q2
+```{r}
+presidential <- subset(presidential, start > economics$date[1])
+
+p2 <- ggplot(economics) +
+  
+  geom_rect(aes(xmin = start, xmax = end, fill = party),
+            ymin = -Inf, ymax = Inf,
+            data = presidential) +
+  
+  geom_vline(aes(xintercept = as.numeric(start)),
+             data = presidential,
+             color = "white", alpha = 0.3, size = 0.5) +
+  
+  geom_text(aes(x = median_x, y = 26, label = name),
+            data = presidential, size = 3.5, angle = 90, 
+            color = "white", family = "Times New Roman") +
+  
+  geom_line(aes(date, uempmed), color = "white", size = 0.8) +
+  
+  scale_fill_manual(values = c("blue", "red")) +
+  
+  labs(x = "Year",
+       y = "Median Duration of Unemployment (Weeks)",
+       fill = "Party") +
+  
+  ylim(0, 30) +
+  
+   theme(plot.subtitle = element_text(vjust = 1),
+         plot.caption = element_text(vjust = 1),
+         axis.title = element_text(size = 10.5),
+         legend.text = element_text(size = 8),
+         axis.text = element_text(size = 2),
+         legend.title = element_text(size = 10),
+         axis.line = element_line(linetype = "solid"),
+         axis.text.x = element_text(angle = 30, vjust = 1, hjust = 1,
+                                    size = 8, family = "Times New Roman"),
+         axis.text.y = element_text(size = 8, family = "Times New Roman"),
+         panel.background = element_rect(fill = "white"))              
+  
+  
+```
+

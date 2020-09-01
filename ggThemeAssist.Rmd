@@ -1,0 +1,25 @@
+---
+title: "ggThemeAssist"
+author: "Ashwin Malshe"
+date: "9/16/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(ggThemeAssist, ggplot2)
+```
+
+Create a simple plot and then enhance using `ggThemeAssist`
+
+```{r}
+
+p1 <- ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+p1
+```
+
